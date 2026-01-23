@@ -74,8 +74,9 @@ fileInput.addEventListener("change", async () => {
       body: await file.arrayBuffer()
     });
 
-    const data = await res.json();
-    output.textContent = JSON.stringify(data, null, 2);
+const text = await res.text();
+console.log("RAW RESPONSE:", text);
+output.textContent = text;
     status.textContent = "Done";
   } catch (err) {
     status.textContent = "Error";
