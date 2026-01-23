@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Order Scanner</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    pre {
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      background: #f7f7f7;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <input type="file" id="fileInput" accept="application/pdf" />
+  <span id="status">Upload a PDF</span>
+</header>
+
+<main>
+  <iframe id="pdfViewer"></iframe>
+  <pre id="output"></pre>
+</main>
+
+<script>
+const FUNCTION_ENDPOINT =
+  "https://functionapporderscannerai.azurewebsites.net/api/scan";
+
+const fileInput = document.getElementById("fileInput");
+const pdfViewer = document.getElementById("pdfViewer");
+const output = document.getElementById("output");
+const status = document.getElementById("status");
+
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  status.textContent = "Scanning...";
+  output.textContent = "";
+
+  pdfViewer.src = URL.createObjectURL(file);
+
+  try {
+    const res = await fetch(FUNCTION_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/pdf" },
+      body: await file.arrayBuffer()
+    });
+
+    const data = await res.json();
+    output.textContent = JSON.stringify(data, null, 2);
+    status.textContent = "Done";
+  } catch (err) {
+    status.textContent = "Error";
+    output.textContent = err.toString();
+  }
+});
+</script>
+
+</body>
+</html>
