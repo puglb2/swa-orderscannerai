@@ -26,8 +26,14 @@ async function submitDocument(mode) {
       body: JSON.stringify(payload)
     });
 
-    const data = await response.json();
-    output.textContent = JSON.stringify(data, null, 2);
+const text = await response.text();
+
+try {
+  const data = JSON.parse(text);
+  output.textContent = JSON.stringify(data, null, 2);
+} catch {
+  output.textContent = "Server returned:\n\n" + text;
+}
 
   } catch (err) {
     output.textContent = "Error: " + err.message;
