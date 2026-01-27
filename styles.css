@@ -1,0 +1,27 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 40px;
+  background: #f7f7f7;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.buttons {
+  margin: 20px 0;
+}
+
+button {
+  margin-right: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+pre {
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #ccc;
+  max-height: 500px;
+  overflow: auto;
+}
