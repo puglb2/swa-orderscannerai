@@ -1,4 +1,4 @@
-const FUNCTION_URL = "https://functionapporderscannerai-ccecbncgayhpfwe0.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=QdM0x_uMLyfN9SAme91OrwCLH2oHwdbSgSrTf854ITjeAzFuvcG4LQ==";
+const FUNCTION_URL = "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=-hroyale2i8an-5ZsY6GvCw2Jx5RGJMljX1SYmqKd0SrAzFuTuBaPQ==";
 
 async function submitDocument(mode) {
   const fileInput = document.getElementById("pdfInput");
