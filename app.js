@@ -1,42 +1,54 @@
-const FUNCTION_URL = "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=-hroyale2i8an-5ZsY6GvCw2Jx5RGJMljX1SYmqKd0SrAzFuTuBaPQ==";
-
+//https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=-hroyale2i8an-5ZsY6GvCw2Jx5RGJMljX1SYmqKd0SrAzFuTuBaPQ==
 async function submitDocument(mode) {
-  const fileInput = document.getElementById("pdfInput");
   const output = document.getElementById("output");
+  const fileInput = document.getElementById("fileInput");
 
-  if (!fileInput.files.length) {
-    alert("Please upload a PDF first.");
+  // Safety checks
+  if (!fileInput) {
+    output.innerText = "File input element not found.";
     return;
   }
 
-  output.textContent = "Processing...";
+  if (!fileInput.files || fileInput.files.length === 0) {
+    output.innerText = "Please select a PDF file first.";
+    return;
+  }
 
   const file = fileInput.files[0];
+
+  // Convert PDF → base64
   const base64 = await fileToBase64(file);
 
-  const payload = {
-    mode: mode,
-    documentBase64: base64
-  };
+  output.innerText = "Processing document…";
 
   try {
-    const response = await fetch(FUNCTION_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const response = await fetch(
+      "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          mode: mode,
+          output: "text",
+          documentBase64: base64
+        })
+      }
+    );
 
-const text = await response.text();
+    if (!response.ok) {
+      output.innerText = "An error occurred while processing the document.";
+      return;
+    }
 
-try {
-  const data = JSON.parse(text);
-  output.textContent = JSON.stringify(data, null, 2);
-} catch {
-  output.textContent = text;
-}
+    const text = await response.text();
+
+    output.innerText = text;
 
   } catch (err) {
-    output.textContent = "Error: " + err.message;
+    console.error(err);
+    output.innerText = "A network error occurred.";
   }
 }
 
@@ -44,11 +56,12 @@ function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const base64 = reader.result.split(",")[1];
+      const result = reader.result;
+      // Remove data:application/pdf;base64, prefix
+      const base64 = result.split(",")[1];
       resolve(base64);
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
 }
-
