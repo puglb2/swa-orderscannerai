@@ -23,7 +23,7 @@ async function submitDocument(mode) {
 
   try {
     const response = await fetch(
-      "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI",
+      "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=-hroyale2i8an-5ZsY6GvCw2Jx5RGJMljX1SYmqKd0SrAzFuTuBaPQ==",
       {
         method: "POST",
         headers: {
