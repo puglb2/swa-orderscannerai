@@ -32,7 +32,7 @@ try {
   const data = JSON.parse(text);
   output.textContent = JSON.stringify(data, null, 2);
 } catch {
-  output.textContent = "Server returned:\n\n" + text;
+  output.textContent = text;
 }
 
   } catch (err) {
