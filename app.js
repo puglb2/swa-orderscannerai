@@ -11,7 +11,7 @@ const UNDERWRITING_ENDPOINT =
 // IMPORTANT: replace this with your actual scan endpoint URL
 // Example: https://functionapporderscannerai-xxxx.azurewebsites.net/api/scan
 const ORDER_SCAN_ENDPOINT =
-  "https://YOUR-ORDER-SCANNER-FUNCTION.azurewebsites.net/api/scan";
+  "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/scan";
 
 
 // ---------------------------
