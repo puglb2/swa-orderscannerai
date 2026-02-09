@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Medical Record Summary & Insurability</title>
+  <title>Medical Record Scanner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
@@ -51,6 +51,20 @@
       background: #1e4fd6;
     }
 
+    .controls button.secondary {
+      background: #111827;
+    }
+
+    .controls button.secondary:hover {
+      background: #0b1220;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
     .output-container {
       margin-top: 24px;
       background: #ffffff;
@@ -59,24 +73,13 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
 
-    /* THIS REPLACES <pre> BEHAVIOR */
+    /* Key: readable + wraps + preserves newlines */
     #output {
-      white-space: normal;          /* allow wrapping */
-      overflow-wrap: break-word;    /* modern wrapping */
-      word-wrap: break-word;        /* legacy support */
+      white-space: pre-wrap;        /* preserves line breaks, still wraps */
+      overflow-wrap: anywhere;      /* prevents horizontal overflow */
       line-height: 1.6;
       font-size: 15px;
-    }
-
-    /* Optional visual polish */
-    #output strong {
-      font-weight: 600;
-    }
-
-    .muted {
-      color: #6b7280;
-      font-size: 13px;
-      margin-top: 6px;
+      color: #1f2937;
     }
   </style>
 </head>
@@ -88,27 +91,21 @@
     <div class="controls">
       <input type="file" id="fileInput" accept=".pdf" />
 
-      <button onclick="submitDocument('summary')">
-        Record Summary
-      </button>
+      <button onclick="submitUnderwriting('summary')">Record Summary</button>
+      <button onclick="submitUnderwriting('score')">Insurability Score</button>
+      <button onclick="submitUnderwriting('both')">Both</button>
 
-      <button onclick="submitDocument('score')">
-        Insurability Score
-      </button>
-
-      <button onclick="submitDocument('both')">
-        Both
+      <button class="secondary" onclick="submitOrderScan()">
+        Order Scan (ICD + Signature)
       </button>
 
       <div class="muted">
-        PDF files only. Processing occurs securely on the server.
+        Upload a PDF, then choose an action. Output is shown below.
       </div>
     </div>
 
     <div class="output-container">
-      <div id="output">
-        Upload a medical record to begin.
-      </div>
+      <div id="output">Upload a PDF to begin.</div>
     </div>
   </div>
 
