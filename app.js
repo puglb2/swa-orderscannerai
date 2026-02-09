@@ -87,15 +87,78 @@ async function submitOrderScan() {
 
     const text = await response.text();
 
-    // Show full raw response no matter what
-    output.innerText =
-      "Status: " + response.status + "\n\n" +
-      text;
+    if (!response.ok) {
+      output.innerText = "Error scanning order.\n\n" + text;
+      return;
+    }
+
+    const data = JSON.parse(text);
+
+    output.innerText = formatOrderScanResults(data);
 
   } catch (err) {
     console.error(err);
-    output.innerText = "Client error:\n\n" + err.toString();
+    output.innerText = "Scan failed.";
   }
+}
+
+
+function formatOrderScanResults(data) {
+  if (!data.orders || data.orders.length === 0) {
+    return "No valid medical orders detected in this document.";
+  }
+
+  let result = "ORDER SCAN RESULTS\n";
+  result += "------------------\n\n";
+
+  data.orders.forEach(order => {
+
+    result += `Order found on page ${order.page_number}\n\n`;
+
+    if (order.order_type)
+      result += `Type: ${capitalize(order.order_type)} Order\n`;
+
+    if (order.ordering_provider)
+      result += `Provider: ${order.ordering_provider}\n`;
+
+    if (order.order_date)
+      result += `Date: ${order.order_date}\n`;
+
+    if (order.tests_or_procedures?.length) {
+      result += "\nTests:\n";
+      order.tests_or_procedures.forEach(t =>
+        result += `• ${t}\n`
+      );
+    }
+
+    if (order.icd10_codes?.length) {
+      result += "\nICD-10 Codes:\n";
+      order.icd10_codes.forEach(code =>
+        result += `• ${code}\n`
+      );
+    }
+
+    if (order.cpt_codes?.length) {
+      result += "\nCPT Codes:\n";
+      order.cpt_codes.forEach(code =>
+        result += `• ${code}\n`
+      );
+    }
+
+    result += `\nSignature: ${order.signature_present ? "Present" : "Not detected"}\n`;
+
+    if (order.confidence)
+      result += `Confidence: ${order.confidence}\n`;
+
+    result += "\n------------------\n\n";
+  });
+
+  return result;
+}
+
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // ---------------------------
