@@ -62,7 +62,6 @@ async function submitUnderwriting(mode) {
 // ---------------------------
 // Order Scan button
 // ---------------------------
-
 async function submitOrderScan() {
   const output = document.getElementById("output");
   const fileInput = document.getElementById("fileInput");
@@ -73,16 +72,14 @@ async function submitOrderScan() {
   }
 
   const file = fileInput.files[0];
-  output.innerText = "Scanning order for ICD/signature…";
+  output.innerText = "Scanning order…";
 
   try {
-    // Send raw PDF bytes (your scan function expects req.get_body())
     const pdfBytes = await file.arrayBuffer();
 
     const response = await fetch(ORDER_SCAN_ENDPOINT, {
       method: "POST",
       headers: {
-        // not strictly required, but helpful
         "Content-Type": "application/pdf"
       },
       body: pdfBytes
@@ -90,26 +87,16 @@ async function submitOrderScan() {
 
     const text = await response.text();
 
-    if (!response.ok) {
-      output.innerText = "Error scanning order.\n\n" + text;
-      return;
-    }
-
-    // Response is JSON; pretty print for readability
-    try {
-      const data = JSON.parse(text);
-      output.innerText = JSON.stringify(data, null, 2);
-    } catch {
-      // If it returns non-JSON for some reason, show raw text
-      output.innerText = text;
-    }
+    // Show full raw response no matter what
+    output.innerText =
+      "Status: " + response.status + "\n\n" +
+      text;
 
   } catch (err) {
     console.error(err);
-    output.innerText = "A network or client error occurred.";
+    output.innerText = "Client error:\n\n" + err.toString();
   }
 }
-
 
 // ---------------------------
 // Helpers
