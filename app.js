@@ -1,21 +1,16 @@
-//https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=-hroyale2i8an-5ZsY6GvCw2Jx5RGJMljX1SYmqKd0SrAzFuTuBaPQ==
 // ---------------------------
 // Configure endpoints
 // ---------------------------
 
-// Your underwriting endpoint (already working)
 const UNDERWRITING_ENDPOINT =
   "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=OT5GTE_GiyNHtYaloDaLXDmcFhaLN1z1fKkth-ImF55pAzFu7Imq2Q==";
 
-// Your order scanner endpoint (scan function)
-// IMPORTANT: replace this with your actual scan endpoint URL
-// Example: https://functionapporderscannerai-xxxx.azurewebsites.net/api/scan
 const ORDER_SCAN_ENDPOINT =
   "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/scan";
 
 
 // ---------------------------
-// Underwriting buttons
+// Underwriting Buttons
 // ---------------------------
 
 async function submitUnderwriting(mode) {
@@ -31,16 +26,13 @@ async function submitUnderwriting(mode) {
   output.innerText = "Processing underwriting request…";
 
   try {
-    const base64 = await fileToBase64(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("mode", mode);
 
     const response = await fetch(UNDERWRITING_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mode: mode,
-        output: "text",
-        documentBase64: base64
-      })
+      body: formData
     });
 
     const text = await response.text();
@@ -60,8 +52,9 @@ async function submitUnderwriting(mode) {
 
 
 // ---------------------------
-// Order Scan button
+// Order Scan Button
 // ---------------------------
+
 async function submitOrderScan() {
   const output = document.getElementById("output");
   const fileInput = document.getElementById("fileInput");
@@ -75,14 +68,12 @@ async function submitOrderScan() {
   output.innerText = "Scanning order…";
 
   try {
-    const pdfBytes = await file.arrayBuffer();
-
     const response = await fetch(ORDER_SCAN_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/pdf"
       },
-      body: pdfBytes
+      body: file
     });
 
     const text = await response.text();
@@ -93,7 +84,6 @@ async function submitOrderScan() {
     }
 
     const data = JSON.parse(text);
-
     output.innerText = formatOrderScanResults(data);
 
   } catch (err) {
@@ -103,77 +93,63 @@ async function submitOrderScan() {
 }
 
 
-function formatOrderScanResults(data) {
-  if (!data.orders || data.orders.length === 0) {
-    return "No valid medical orders detected in this document.";
-  }
+// ---------------------------
+// Formatting
+// ---------------------------
 
+function formatOrderScanResults(data) {
   let result = "ORDER SCAN RESULTS\n";
   result += "------------------\n\n";
 
-  data.orders.forEach(order => {
+  if (!data.orders || data.orders.length === 0) {
+    result += "No valid medical orders detected in this document.\n";
+  } else {
+    data.orders.forEach(order => {
 
-    result += `Order found on page ${order.page_number}\n\n`;
+      result += `Order found on page ${order.page_number}\n\n`;
 
-    if (order.order_type)
-      result += `Type: ${capitalize(order.order_type)} Order\n`;
+      result += `Type: ${order.order_type ? capitalize(order.order_type) : "Not identified"}\n`;
+      result += `Provider: ${order.ordering_provider || "Not identified"}\n`;
+      result += `Date: ${order.order_date || "Not identified"}\n`;
 
-    if (order.ordering_provider)
-      result += `Provider: ${order.ordering_provider}\n`;
-
-    if (order.order_date)
-      result += `Date: ${order.order_date}\n`;
-
-    if (order.tests_or_procedures?.length) {
       result += "\nTests:\n";
-      order.tests_or_procedures.forEach(t =>
-        result += `• ${t}\n`
-      );
-    }
+      if (order.tests_or_procedures?.length) {
+        order.tests_or_procedures.forEach(t => result += `• ${t}\n`);
+      } else {
+        result += "• Not identified\n";
+      }
 
-    if (order.icd10_codes?.length) {
       result += "\nICD-10 Codes:\n";
-      order.icd10_codes.forEach(code =>
-        result += `• ${code}\n`
-      );
-    }
+      if (order.icd10_codes?.length) {
+        order.icd10_codes.forEach(code => result += `• ${code}\n`);
+      } else {
+        result += "• Not identified\n";
+      }
 
-    if (order.cpt_codes?.length) {
       result += "\nCPT Codes:\n";
-      order.cpt_codes.forEach(code =>
-        result += `• ${code}\n`
-      );
-    }
+      if (order.cpt_codes?.length) {
+        order.cpt_codes.forEach(code => result += `• ${code}\n`);
+      } else {
+        result += "• Not identified\n";
+      }
 
-    result += `\nSignature: ${order.signature_present ? "Present" : "Not detected"}\n`;
+      result += `\nSignature: ${order.signature_present ? "Present" : "Not detected"}\n`;
+      result += `Confidence: ${order.confidence || "N/A"}\n`;
 
-    if (order.confidence)
-      result += `Confidence: ${order.confidence}\n`;
+      result += "\n------------------\n\n";
+    });
+  }
 
-    result += "\n------------------\n\n";
-  });
+  if (data.document_signature) {
+    result += "DOCUMENT-LEVEL SIGNATURE\n";
+    result += "------------------------\n";
+    result += `Signature: ${data.document_signature.signature_present ? "Present" : "Not detected"}\n`;
+  }
 
   return result;
 }
 
 
 function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-// ---------------------------
-// Helpers
-// ---------------------------
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      const base64 = result.split(",")[1];
-      resolve(base64);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 }
