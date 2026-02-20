@@ -5,7 +5,7 @@
 
 // Your underwriting endpoint (already working)
 const UNDERWRITING_ENDPOINT =
-  "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=-hroyale2i8an-5ZsY6GvCw2Jx5RGJMljX1SYmqKd0SrAzFuTuBaPQ==";
+  "https://famrsummaryscore-ceedd0e2d4buhscz.eastus2-01.azurewebsites.net/api/UnderwritingAI?code=OT5GTE_GiyNHtYaloDaLXDmcFhaLN1z1fKkth-ImF55pAzFu7Imq2Q==";
 
 // Your order scanner endpoint (scan function)
 // IMPORTANT: replace this with your actual scan endpoint URL
