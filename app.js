@@ -10,7 +10,7 @@ const ORDER_SCAN_ENDPOINT =
 
 
 // ---------------------------
-// Underwriting Buttons
+// Underwriting Buttons (FIXED)
 // ---------------------------
 
 async function submitUnderwriting(mode) {
@@ -26,13 +26,19 @@ async function submitUnderwriting(mode) {
   output.innerText = "Processing underwriting request…";
 
   try {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("mode", mode);
+    const base64 = await fileToBase64(file);
+
+    console.log("MODE:", mode); // debug
 
     const response = await fetch(UNDERWRITING_ENDPOINT, {
       method: "POST",
-      body: formData
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        mode: mode,
+        documentBase64: base64
+      })
     });
 
     const text = await response.text();
@@ -52,7 +58,7 @@ async function submitUnderwriting(mode) {
 
 
 // ---------------------------
-// Order Scan Button
+// Order Scan Button (UNCHANGED)
 // ---------------------------
 
 async function submitOrderScan() {
@@ -152,4 +158,21 @@ function formatOrderScanResults(data) {
 
 function capitalize(s) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+}
+
+
+// ---------------------------
+// Helper (REQUIRED)
+// ---------------------------
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
